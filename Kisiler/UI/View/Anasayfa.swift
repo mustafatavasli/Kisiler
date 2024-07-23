@@ -9,20 +9,22 @@ import SwiftUI
 
 struct Anasayfa: View {
     
-    @State private var kisilerListesi = [Kisiler]()
     @State private var aramaKelimesi : String = ""
+    
+    // ViewModel Object
+    @ObservedObject var viewModel = AnasayfaViewModel()
     
     // Delete Function
     func sil(at offsets: IndexSet) {
-        let kisi = kisilerListesi[offsets.first!]
-        kisilerListesi.remove(at: offsets.first!)
-        print("Kişi Sil: \(kisi.kisiID!)")
+        let kisi = viewModel.kisilerListesi[offsets.first!]
+        viewModel.kisilerListesi.remove(at: offsets.first!)
+        viewModel.sil(kisi_id: kisi.kisiID!)
     }
     
     var body: some View {
         NavigationStack {
             List {
-                ForEach(kisilerListesi) { kisi in
+                ForEach(viewModel.kisilerListesi) { kisi in
                     NavigationLink(destination: KisiDetay(kisi: kisi)) {
                         KisilerSatir(kisi: kisi)
                     }
@@ -38,20 +40,13 @@ struct Anasayfa: View {
                 }
             }
             .onAppear {
-                var liste = [Kisiler]()
-                let k1 = Kisiler(kisiID: 1, kisiAd: "Mustafa", kisiTel: "111")
-                let k2 = Kisiler(kisiID: 2, kisiAd: "Esra", kisiTel: "222")
-                let k3 = Kisiler(kisiID: 3, kisiAd: "Emin", kisiTel: "333")
-                liste.append(k1)
-                liste.append(k2)
-                liste.append(k3)
-                kisilerListesi = liste
+                viewModel.kisileriYukle()
                 print("Anasayfaya Dönüş Yapıldı")
             }
         }
         .searchable(text: $aramaKelimesi, prompt: "Ara")
         .onChange(of: aramaKelimesi) { oldValue, newValue in
-            print("Kişi Ara: \(newValue)")
+            viewModel.ara(kelime: newValue)
         }
     }
 }
